@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Rishabh — Portfolio</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Icons (for social icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+
+  <!-- Spline viewer -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.0/build/spline-viewer.js"></script>
+
+  <style>
+    :root{
+      --bg:#071026;
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(230,238,248,0.72);
+      --accent-start:#00d4ff;
+      --accent-end:#7c5cff;
+      --max-width:1200px;
+      --parallax-strength: 18; /* px */
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body,#app{height:100%}
+    body{
+      background: var(--bg);
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      overflow-x:hidden;
+    }
+
+    /* Spline background - full viewport */
+    spline-viewer{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+      display:block;
+      /* make the 3D scene interactive with mouse */
+      pointer-events:auto;
+    }
+
+    /* Particle canvas sits on top of spline but underneath UI */
+    #particles{
+      position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0.85
+    }
+
+    /* overlay for contrast */
+    .bg-overlay{
+      position:fixed;inset:0;z-index:2;
+      background: linear-gradient(180deg, rgba(2,6,12,0.12), rgba(2,6,12,0.6));
+      backdrop-filter: blur(6px) saturate(110%);
+      pointer-events:none;
+    }
+
+    /* Page container */
+    .container{
+      position:relative;z-index:3;max-width:var(--max-width);margin:0 auto;padding:28px 20px 80px;transition:transform 0.12s ease-out,filter .2s;
+      transform:translate3d(0,0,0);
+    }
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:grid;place-items:center;color:#071126;font-weight:800;font-size:20px;box-shadow:0 6px 18px rgba(124,92,255,0.12);
+      transform:translateZ(0);transition:transform .18s cubic-bezier(.2,.9,.3,1);
+    }
+    .logo:hover{transform:translateY(-4px) scale(1.03)}
+    .brand h1{font-size:18px;letter-spacing:0.2px}
+    nav{display:flex;gap:14px;align-items:center}
+    nav a{color:var(--muted);text-decoration:none;padding:8px;border-radius:8px;font-weight:600}
+    nav a:hover{color:#fff;background:rgba(255,255,255,0.03)}
+
+    .cta{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));padding:8px 12px;border-radius:12px;color:#071126;font-weight:700}
+
+    .menu-btn{display:none;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:10px}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:center;padding:52px 0}
+    .intro{max-width:720px}
+    .eyebrow{display:inline-block;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:999px;font-weight:700;margin-bottom:18px}
+    h2{font-size:44px;line-height:1.02;margin-bottom:12px}
+    p.lead{color:rgba(230,238,248,0.9);font-size:16px;margin-bottom:18px}
+
+    .actions{display:flex;gap:12px;margin-top:18px}
+    .btn{padding:12px 16px;border-radius:10px;font-weight:700;border:1px solid rgba(255,255,255,0.06);background:transparent}
+    .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#071126;border:none}
+
+    /* Right column card */
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:20px;border-radius:16px;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(2,6,12,.6)}
+    .stats{display:flex;gap:12px;flex-wrap:wrap}
+    .stat{min-width:120px}
+    .stat h3{font-size:20px}
+    .small{color:var(--muted);font-weight:600}
+
+    /* Projects */
+    .section{margin-top:40px}
+    .projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+    .project{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);transition:transform .16s ease,box-shadow .16s ease;transform-style:preserve-3d}
+    .project:hover{box-shadow:0 14px 40px rgba(2,6,12,0.6);}
+    .project h4{margin-bottom:8px}
+    .project p{color:var(--muted);font-size:14px}
+
+    .skills{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:600}
+
+    footer{margin-top:48px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal .overlay{position:absolute;inset:0;background:rgba(3,6,12,0.6);backdrop-filter:blur(4px)}
+    .modal .panel{position:relative;background:#071126;border-radius:12px;padding:20px;max-width:880px;width:94%;z-index:2}
+
+    /* Responsive */
+    @media (max-width:1000px){
+      .hero{grid-template-columns:1fr;}
+      .projects-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:640px){
+      .projects-grid{grid-template-columns:1fr}
+      nav{display:none}
+      .menu-btn{display:inline-flex}
+      header{gap:10px}
+      h2{font-size:32px}
+      .card{display:none}
+    }
+
+    /* subtle focus ring */
+    a:focus{outline:3px solid rgba(124,92,255,0.16);outline-offset:3px}
+  </style>
+</head>
+
+<body>
+  <!-- Spline scene (interactive) -->
+  <spline-viewer id="spline" url="https://prod.spline.design/tbL7yCvMalIN4nhX/scene.splinecode" camera="0.7" fps="30"></spline-viewer>
+
+  <!-- subtle particle overlay to give depth and respond to mouse -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <main id="app">
+    <div class="container" id="pageContainer">
+
+      <header>
+        <div class="brand">
+          <div class="logo">R</div>
+          <div>
+            <h1>Rishabh</h1>
+            <div style="font-size:12px;color:var(--muted)">Android dev · UI/UX · Supabase · Wordpress · Web · Blender</div>
+          </div>
+        </div>
+
+        <nav aria-label="Main navigation">
+          <a href="#about">About</a>
+          <a href="#projects">Projects</a>
+          <a href="#skills">Skills</a>
+          <a href="#contact" class="cta">Contact</a>
+        </nav>
+
+        <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-label="Open menu">
+          <i class="fa fa-bars"></i>
+        </button>
+      </header>
+
+      <section class="hero" id="about">
+        <div class="intro">
+          <span class="eyebrow">Hi — I'm</span>
+          <h2>Rishabh — building apps and tools that people actually use.</h2>
+          <p class="lead">I build Android apps (Java & Kotlin), connect them to Supabase backends, and design clean, privacy-first UIs. Currently working on room-rental systems and admin tools.</p>
+
+          <div class="actions">
+            <a href="#projects" class="btn primary">See my work</a>
+            <a href="mailto:rishabh@example.com" class="btn">Hire / Contact</a>
+          </div>
+
+          <div style="margin-top:20px;color:var(--muted)">
+            <strong>Open to:</strong> Freelance, collaboration, internships — especially mobile/backend tooling.
+          </div>
+
+          <div style="margin-top:16px" class="skills">
+            <span class="pill">Android (Java/Kotlin)</span>
+            <span class="pill">Supabase</span>
+            <span class="pill">UI/UX</span>
+            <span class="pill">Web-Dev</span>
+            <span class="pill">Java</span>
+          </div>
+        </div>
+
+        <aside class="card" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div style="font-size:12px;color:var(--muted);">Experience</div>
+              <h3 style="margin-top:6px">Building production apps</h3>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Location</div>
+              <div style="font-weight:800">Madhya Pradesh, India</div>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="small">MiniRent</div><h3>Room rental app</h3></div>
+            <div class="Start"><div class="small">CampusBus</div><h3>University Bus Tracking Application</h3>
+            <div class="stat"><div class="small">Supabase</div><h3>Backends & Storage</h3></div>
+            <div class="stat"><div class="small">Tools</div><h3>Android Studio, Git</h3></div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="projects" class="section">
+        <h3 style="font-size:20px">Selected projects</h3>
+        <p class="small" style="margin-top:6px;">Click a project to view details.</p>
+
+        <div class="projects-grid" id="projectsGrid">
+          <!-- Project items injected by JS -->
+        </div>
+      </section>
+
+      <section id="skills" class="section">
+        <h3 style="font-size:20px">Skills & tools</h3>
+        <div class="skills" style="margin-top:12px">
+          <span class="pill">Java</span>
+          <span class="pill">Kotlin</span>
+          <span class="pill">Supabase</span>
+          <span class="pill">Web-Dev</span>
+          <span class="pill">Blender</span>
+          <span class="pill">Figma</span>
+          <span class="pill">Git</span>
+          <span class="pill">UI/UX</span>
+          <span class="pill">Android Studio</span>
+          <span class="pill">Wordpress</span>
+        </div>
+      </section>
+
+      <section id="contact" class="section">
+        <h3 style="font-size:20px">Contact</h3>
+        <p class="small" style="margin-top:6px">Want to work together? Send a message or email me directly.</p>
+
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
+          <a class="social" href="https://www.instagram.com/adityabarman64/?hl=en" aria-label="Instagram"><i class="fa fa-github"></i> Github</a>
+          <a class="social" href="https://www.linkedin.com/public-profile/settings?trk=d_flagship3_profile_self_view_public_profile" aria-label="LinkedIn"><i class="fa fa-linkedin"></i> LinkedIn</a>
+          <a class="social" href="mailto:rishabh@example.com" aria-label="Email"><i class="fa fa-envelope"></i> Email</a>
+        </div>
+      </section>
+
+      <footer>
+        <div>© <span id="year"></span> Rishabh — Built with ❤️ The Ensuing Monarch.</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <a href="#" class="small">Resume</a>
+          <a href="#" class="small">Privacy</a>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Project modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="overlay" data-close></div>
+    <div class="panel">
+      <button id="closeModal" style="position:absolute;right:12px;top:12px;background:transparent;border:none;color:var(--muted);font-size:18px">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Project data (edit to add your real projects)
+    const projects = [
+      {
+        id: 'minirent',
+        title: 'MiniRent — Room rental app',
+        description: 'A privacy-first room booking app (hourly to monthly) with Supabase backend, image storage, and admin moderation tools.',
+        details: 'Built with Java, Kotlin & Supabase. Features: auth, storage, room listing, admin panel, reviews, location-based search.'
+      },
+      {
+        id: 'drone-course',
+        title: 'Drone course platform',
+        description: 'An end-to-end course platform and exercises to teach drone making from beginner to expert.',
+        details: 'Curriculum design, interactive exercises, and printable schematics.'
+      },
+      {
+        id: 'portfolio-website',
+        title: 'Personal Portfolio (this site)',
+        description: 'Responsive, single-file portfolio with Spline 3D background and lightweight JS.',
+        details: 'Single-page design, accessible markup, and deploy-ready as a static site.'
+      }
+    ];
+
+    // Render projects
+    const grid = document.getElementById('projectsGrid');
+    projects.forEach(p => {
+      const el = document.createElement('article');
+      el.className = 'project';
+      el.innerHTML = `
+        <h4>${p.title}</h4>
+        <p>${p.description}</p>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn" data-id="${p.id}">View</button>
+          <a class="btn" href="#" onclick="event.preventDefault();alert('Demo not configured')">Live</a>
+        </div>
+      `;
+      grid.appendChild(el);
+    });
+
+    // Modal behavior
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    function openModal(id){
+      const p = projects.find(x=>x.id===id);
+      modalContent.innerHTML = `<h3>${p.title}</h3><p style='color:var(--muted)'>${p.details}</p>`;
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+    }
+    function closeModal(){
+      modal.style.display='none';
+      modal.setAttribute('aria-hidden','true');
+    }
+    document.addEventListener('click', e=>{
+      const btn = e.target.closest('button[data-id]');
+      if(btn) openModal(btn.dataset.id);
+      if(e.target.matches('[data-close]') || e.target.id==='closeModal') closeModal();
+    });
+
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    menuBtn.addEventListener('click', ()=>{
+      const nav = document.querySelector('nav');
+      const expanded = menuBtn.getAttribute('aria-expanded')==='true';
+      menuBtn.setAttribute('aria-expanded', String(!expanded));
+      if(!expanded){nav.style.display='flex';nav.style.flexDirection='column';nav.style.position='absolute';nav.style.right='20px';nav.style.top='64px';nav.style.background='rgba(2,6,12,0.6)';nav.style.backdropFilter='blur(6px)';nav.style.padding='12px';}
+      else{nav.style.display='none';}
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Accessibility: close modal with escape
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal();});
+
+    // ---------- Parallax + UI micro-interaction ----------
+    const page = document.getElementById('pageContainer');
+    const spline = document.getElementById('spline');
+    const particlesCanvas = document.getElementById('particles');
+    const ctx = particlesCanvas.getContext('2d');
+
+    // resize canvas to viewport
+    function resize(){
+      particlesCanvas.width = innerWidth * devicePixelRatio;
+      particlesCanvas.height = innerHeight * devicePixelRatio;
+      particlesCanvas.style.width = innerWidth + 'px';
+      particlesCanvas.style.height = innerHeight + 'px';
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    // particles
+    const particles = [];
+    const PARTICLE_COUNT = 45;
+    for(let i=0;i<PARTICLE_COUNT;i++){
+      particles.push({
+        x: Math.random()*innerWidth,
+        y: Math.random()*innerHeight,
+        r: 1 + Math.random()*3,
+        vx: (Math.random()-0.5)*0.2,
+        vy: (Math.random()-0.5)*0.2
+      });
+    }
+
+    let mouseX = innerWidth/2, mouseY = innerHeight/2;
+
+    function animateParticles(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      for(const p of particles){
+        // slight attraction to mouse
+        const dx = mouseX - p.x, dy = mouseY - p.y;
+        const dist = Math.max(40, Math.hypot(dx,dy));
+        const force = 40/dist;
+        p.vx += dx * 0.0008 * force;
+        p.vy += dy * 0.0008 * force;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.98; p.vy *= 0.98;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(124,92,255,0.16)';
+        ctx.fill();
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Parallax effect for page UI (subtle)
+    document.addEventListener('mousemove', (e)=>{
+      const cx = innerWidth/2, cy = innerHeight/2;
+      const dx = (e.clientX - cx)/cx; // -1..1
+      const dy = (e.clientY - cy)/cy;
+      const tx = dx * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--parallax-strength'));
+      const ty = dy * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--parallax-strength'));
+      page.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+
+      // Move particles attractor
+      mouseX = e.clientX; mouseY = e.clientY;
+
+      // Small spline viewer subtle camera nudge using its own pointer capabilities -- keep pointer events active
+      // (Spline viewer will handle camera when pointer is over it.)
+    });
+
+    // Add tilt on project cards
+    function applyTilt(el, e){
+      const rect = el.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width; // 0..1
+      const py = (e.clientY - rect.top) / rect.height;
+      const rx = (py - 0.5) * -8; // rotateX
+      const ry = (px - 0.5) * 12; // rotateY
+      el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(6px)`;
+    }
+    function resetTilt(el){ el.style.transform = ''; }
+    document.querySelectorAll('.project').forEach(card=>{
+      card.addEventListener('mousemove', e=>applyTilt(card,e));
+      card.addEventListener('mouseleave', ()=>resetTilt(card));
+    });
+
+    // If projects are re-rendered later, you can call attachTilt() to re-bind.
+
+    // Helpful console message
+    console.log('%cInteractive portfolio loaded — Spline is interactive and UI responds to mouse.','color:#00d4ff');
+
+    // Notes for you: 
+    // - To make the Spline scene respond programmatically (beyond pointer camera), you can use the Spline viewer API or postMessage between frame and page. I left pointer events active so the scene responds to hover & drag natively.
+    // - Tweak --parallax-strength in :root to adjust UI motion.
+
+  </script>
+
+  <!-- Quick deploy tips:
+    - Replace mailto/social links with your real addresses
+    - If you want the Spline scene to NOT block mobile scroll gestures, consider toggling pointer-events: auto/none on spline-viewer for small screens.
+    - To add images to projects, add an `image` field to each project object and render an <img> tag inside the project card.
+  -->
+</body>
+</html>
