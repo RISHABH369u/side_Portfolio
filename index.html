@@ -6,15 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f172a" />
   <title>Rishabh — Portfolio</title>
-
-  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Icons (for social icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
-
-  <!-- Spline viewer -->
   <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.0/build/spline-viewer.js"></script>
 
   <style>
@@ -25,7 +19,7 @@
       --accent-start:#00d4ff;
       --accent-end:#7c5cff;
       --max-width:1200px;
-      --parallax-strength: 18; /* px */
+      --parallax-strength: 18;
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     }
 
@@ -40,7 +34,7 @@
       overflow-x:hidden;
     }
 
-    /* Spline background - full viewport */
+  
     spline-viewer{
       position:fixed;
       inset:0;
@@ -48,16 +42,13 @@
       height:100%;
       z-index:0;
       display:block;
-      /* make the 3D scene interactive with mouse */
       pointer-events:auto;
     }
 
-    /* Particle canvas sits on top of spline but underneath UI */
     #particles{
       position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0.85
     }
 
-    /* overlay for contrast */
     .bg-overlay{
       position:fixed;inset:0;z-index:2;
       background: linear-gradient(180deg, rgba(2,6,12,0.12), rgba(2,6,12,0.6));
@@ -65,7 +56,6 @@
       pointer-events:none;
     }
 
-    /* Page container */
     .container{
       position:relative;z-index:3;max-width:var(--max-width);margin:0 auto;padding:28px 20px 80px;transition:transform 0.12s ease-out,filter .2s;
       transform:translate3d(0,0,0);
@@ -87,7 +77,6 @@
 
     .menu-btn{display:none;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:10px}
 
-    /* Hero */
     .hero{display:grid;grid-template-columns:1fr 420px;gap:36px;align-items:center;padding:52px 0}
     .intro{max-width:720px}
     .eyebrow{display:inline-block;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:999px;font-weight:700;margin-bottom:18px}
@@ -143,10 +132,8 @@
 </head>
 
 <body>
-  <!-- Spline scene (interactive) -->
   <spline-viewer id="spline" url="https://prod.spline.design/tbL7yCvMalIN4nhX/scene.splinecode" camera="0.7" fps="30"></spline-viewer>
 
-  <!-- subtle particle overlay to give depth and respond to mouse -->
   <canvas id="particles" aria-hidden="true"></canvas>
 
   <div class="bg-overlay" aria-hidden="true"></div>
@@ -225,7 +212,7 @@
         <p class="small" style="margin-top:6px;">Click a project to view details.</p>
 
         <div class="projects-grid" id="projectsGrid">
-          <!-- Project items injected by JS -->
+          <!-- Project items  -->
         </div>
       </section>
 
@@ -277,7 +264,7 @@
   </div>
 
   <script>
-    // Project data (edit to add your real projects)
+    // Project data 
     const projects = [
       {
         id: 'minirent',
@@ -347,10 +334,8 @@
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Accessibility: close modal with escape
     document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal();});
 
-    // ---------- Parallax + UI micro-interaction ----------
     const page = document.getElementById('pageContainer');
     const spline = document.getElementById('spline');
     const particlesCanvas = document.getElementById('particles');
@@ -416,17 +401,14 @@
       // Move particles attractor
       mouseX = e.clientX; mouseY = e.clientY;
 
-      // Small spline viewer subtle camera nudge using its own pointer capabilities -- keep pointer events active
-      // (Spline viewer will handle camera when pointer is over it.)
     });
 
-    // Add tilt on project cards
     function applyTilt(el, e){
       const rect = el.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width; // 0..1
+      const px = (e.clientX - rect.left) / rect.width; 
       const py = (e.clientY - rect.top) / rect.height;
-      const rx = (py - 0.5) * -8; // rotateX
-      const ry = (px - 0.5) * 12; // rotateY
+      const rx = (py - 0.5) * -8; 
+      const ry = (px - 0.5) * 12; 
       el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(6px)`;
     }
     function resetTilt(el){ el.style.transform = ''; }
@@ -434,22 +416,8 @@
       card.addEventListener('mousemove', e=>applyTilt(card,e));
       card.addEventListener('mouseleave', ()=>resetTilt(card));
     });
-
-    // If projects are re-rendered later, you can call attachTilt() to re-bind.
-
-    // Helpful console message
     console.log('%cInteractive portfolio loaded — Spline is interactive and UI responds to mouse.','color:#00d4ff');
 
-    // Notes for you: 
-    // - To make the Spline scene respond programmatically (beyond pointer camera), you can use the Spline viewer API or postMessage between frame and page. I left pointer events active so the scene responds to hover & drag natively.
-    // - Tweak --parallax-strength in :root to adjust UI motion.
-
   </script>
-
-  <!-- Quick deploy tips:
-    - Replace mailto/social links with your real addresses
-    - If you want the Spline scene to NOT block mobile scroll gestures, consider toggling pointer-events: auto/none on spline-viewer for small screens.
-    - To add images to projects, add an `image` field to each project object and render an <img> tag inside the project card.
-  -->
 </body>
 </html>
